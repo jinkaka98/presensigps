@@ -67,7 +67,11 @@ class PresensiController extends Controller
             ->join('jam_kerja', 'konfigurasi_jamkerja.kode_jam_kerja', '=', 'jam_kerja.kode_jam_kerja')
             ->where('nik', $nik)->where('hari', $namahari)->first();
 
-        return view('presensi.create', compact('cek', 'lok_kantor', 'jamkerja'));
+        if ($jamkerja == null) {
+            return view('presensi.notifjadwal');
+        } else {
+            return view('presensi.create', compact('cek', 'lok_kantor', 'jamkerja'));
+        }
     }
 
     public function store(Request $request)
@@ -187,6 +191,9 @@ class PresensiController extends Controller
         $no_hp = $request->no_hp;
         $password = Hash::make($request->password);
         $karyawan = DB::table('karyawan')->where('nik', $nik)->first();
+        $request->validate([
+            'foto' => 'required|image|mimes:png,jpg|max:500'
+        ]);
         if ($request->hasFile('foto')) {
             $foto = $nik . "." . $request->file('foto')->getClientOriginalExtension();
         } else {
